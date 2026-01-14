@@ -5,14 +5,12 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
-  /// INIT
   static Future init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(android: android);
     await _plugin.initialize(settings);
   }
 
-  /// 🔔 SCHEDULE / UPDATE ALARM
   static Future scheduleOrUpdateAlarm({
     required int id,
     required String title,
@@ -35,16 +33,14 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // 🔁 daily repeat
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
-  /// ❌ CANCEL ONE ALARM
   static Future cancelAlarm(int id) async {
     await _plugin.cancel(id);
   }
 
-  /// ❌ CANCEL ALL ALARMS
   static Future cancelAll() async {
     await _plugin.cancelAll();
   }

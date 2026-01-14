@@ -20,9 +20,9 @@ class MedicineNotifier extends StateNotifier<List<Medicine>> {
   }
 
   Future updateMedicine(Medicine oldMed, Medicine newMed) async {
-    await oldMed.delete(); // remove old
-    await StorageService.add(newMed); // add updated
-    load(); // refresh list
+    await oldMed.delete();
+    await StorageService.add(newMed);
+    load();
   }
 }
 

@@ -5,7 +5,7 @@ import '../providers/medicine_provider.dart';
 import '../services/notification_service.dart';
 
 class AddMedicineScreen extends ConsumerStatefulWidget {
-  final Medicine? medicine; // 👈 null = add, not null = edit
+  final Medicine? medicine;
 
   const AddMedicineScreen({super.key, this.medicine});
 
@@ -40,7 +40,6 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
     if (t != null) setState(() => _time = t);
   }
 
-  /// 🔔 ADD OR UPDATE
   void _save() async {
     if (_name.text.isEmpty || _dose.text.isEmpty || _time == null) return;
 
@@ -54,7 +53,6 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
     );
 
     if (isEdit) {
-      /// 🔁 UPDATE MODE
       final oldMed = widget.medicine!;
 
       final updatedMed = Medicine(
@@ -62,18 +60,15 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
         dose: _dose.text,
         hour: _time!.hour,
         minute: _time!.minute,
-        alarmId: oldMed.alarmId, // keep same alarmId
+        alarmId: oldMed.alarmId,
       );
 
-      /// update in provider / hive
       await ref
           .read(medicineProvider.notifier)
           .updateMedicine(oldMed, updatedMed);
 
-      /// 🔔 update alarm
       await updateAlarm(updatedMed, _time!);
     } else {
-      /// ➕ ADD MODE
       final alarmId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
       final med = Medicine(
@@ -84,10 +79,8 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
         alarmId: alarmId,
       );
 
-      /// SAVE TO DB
       await ref.read(medicineProvider.notifier).addMedicine(med);
 
-      /// 🔔 SCHEDULE NOTIFICATION
       await NotificationService.scheduleOrUpdateAlarm(
         id: alarmId,
         title: "Medicine Reminder",
@@ -99,9 +92,6 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
     Navigator.pop(context);
   }
 
-  // =========================================================
-  // 🔔 ALARM UPDATE FUNCTION (YOUR REQUEST)
-  // =========================================================
   Future updateAlarm(Medicine med, TimeOfDay newTime) async {
     final now = DateTime.now();
     final newSchedule = DateTime(
@@ -112,10 +102,8 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
       newTime.minute,
     );
 
-    /// ❌ cancel old alarm
     await NotificationService.cancelAlarm(med.alarmId);
 
-    /// 🔁 schedule again with same id
     await NotificationService.scheduleOrUpdateAlarm(
       id: med.alarmId,
       title: "Medicine Reminder",
@@ -123,8 +111,6 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
       time: newSchedule,
     );
   }
-
-  // =========================================================
 
   @override
   Widget build(BuildContext context) {
